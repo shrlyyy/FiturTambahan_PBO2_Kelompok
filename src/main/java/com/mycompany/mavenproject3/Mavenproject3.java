@@ -23,9 +23,19 @@ public class Mavenproject3 extends JFrame implements Runnable {
     private JButton addProductButton;
     private JButton sellingButton;
     private JButton customerButton;
+    private String currentUser;
 
     public Mavenproject3() {
+        initUI();
+        showLoginDialog();
+    }
 
+    public Mavenproject3(String username) {
+        this();
+        onLoginSuccess(username);
+    }
+
+    private void initUI() {
         ProductForm form = new ProductForm();
         this.text = form.getProductBannerText();
 
@@ -44,13 +54,16 @@ public class Mavenproject3 extends JFrame implements Runnable {
         addProductButton = new JButton("Kelola Produk");
         customerButton = new JButton("Kelola Customer");
         sellingButton = new JButton("Penjualan");
+
         bottomPanel.add(addProductButton);
         bottomPanel.add(customerButton);
         bottomPanel.add(sellingButton);
-        add(bottomPanel, BorderLayout.SOUTH);
-        add(bottomPanel, BorderLayout.SOUTH);
-        add(bottomPanel, BorderLayout.SOUTH);
 
+        addProductButton.setVisible(false);
+        customerButton.setVisible(false);
+        sellingButton.setVisible(false);
+
+        add(bottomPanel, BorderLayout.SOUTH);
 
         form.setProductChangeListener(() -> {
             SwingUtilities.invokeLater(() -> {
@@ -59,24 +72,42 @@ public class Mavenproject3 extends JFrame implements Runnable {
         });
     
         addProductButton.addActionListener(e -> {
+        // form.setUsername(currentUser);
         form.setVisible(true);
         updateBannerText(form.getProductBannerText());
         });
 
         customerButton.addActionListener(e -> {
         CustomerForm customerForm = new CustomerForm();
+        // customerForm.setUsername(currentUser);
         customerForm.setVisible(true);
         });
 
         sellingButton.addActionListener(e -> {
         SellingForm sellingForm = new SellingForm(form);
+        // sellingForm.setUsername(currentUser);
         sellingForm.setVisible(true);
         });
+
+        // showLoginDialog();
 
         setVisible(true);
 
         Thread thread = new Thread(this);
         thread.start();
+    }
+
+    private void showLoginDialog() {
+        LoginForm login = new LoginForm(this);
+        login.setVisible(true);
+    }
+
+    public void onLoginSuccess(String username) {
+        this.currentUser = username;
+
+        addProductButton.setVisible(true);
+        customerButton.setVisible(true);
+        sellingButton.setVisible(true);
     }
 
     class BannerPanel extends JPanel {
