@@ -23,11 +23,13 @@ public class CustomerForm extends JFrame {
     private DefaultTableModel tableModel;
 
     private ArrayList<String> registeredPhones = new ArrayList<>();
-    private static ArrayList<Customer> customers = new ArrayList<>();
+    private ArrayList<Customer> customers;
     private boolean isEditing = false;
     private int editingIndex = -1;
 
-    public CustomerForm() {
+    public CustomerForm(ArrayList<Customer> customers) {
+        this.customers = customers; 
+        
         setTitle("WK. Cuan | Form Customer");
         setSize(600, 300);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);

@@ -14,6 +14,7 @@ import javax.swing.*;
 import com.mycompany.mavenproject3.Mavenproject3.BannerPanel;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public class Mavenproject3 extends JFrame implements Runnable {
     private String text;
@@ -23,7 +24,10 @@ public class Mavenproject3 extends JFrame implements Runnable {
     private JButton addProductButton;
     private JButton sellingButton;
     private JButton customerButton;
+    private JButton reservationButton;
     private String currentUser;
+
+    private ArrayList<Customer> sharedCustomers = new ArrayList<>();
 
     public Mavenproject3() {
         initUI();
@@ -54,14 +58,17 @@ public class Mavenproject3 extends JFrame implements Runnable {
         addProductButton = new JButton("Kelola Produk");
         customerButton = new JButton("Kelola Customer");
         sellingButton = new JButton("Penjualan");
+        reservationButton = new JButton("Reservasi");
 
         bottomPanel.add(addProductButton);
         bottomPanel.add(customerButton);
         bottomPanel.add(sellingButton);
+        bottomPanel.add(reservationButton);
 
         addProductButton.setVisible(false);
         customerButton.setVisible(false);
         sellingButton.setVisible(false);
+        reservationButton.setVisible(false);
 
         add(bottomPanel, BorderLayout.SOUTH);
 
@@ -78,7 +85,7 @@ public class Mavenproject3 extends JFrame implements Runnable {
         });
 
         customerButton.addActionListener(e -> {
-        CustomerForm customerForm = new CustomerForm();
+        CustomerForm customerForm = new CustomerForm(sharedCustomers);
         // customerForm.setUsername(currentUser);
         customerForm.setVisible(true);
         });
@@ -87,6 +94,11 @@ public class Mavenproject3 extends JFrame implements Runnable {
         SellingForm sellingForm = new SellingForm(form);
         // sellingForm.setUsername(currentUser);
         sellingForm.setVisible(true);
+        });
+
+        reservationButton.addActionListener(e -> {
+            ReservationForm reservationForm = new ReservationForm(sharedCustomers);
+            reservationForm.setVisible(true);
         });
 
         // showLoginDialog();
@@ -108,6 +120,7 @@ public class Mavenproject3 extends JFrame implements Runnable {
         addProductButton.setVisible(true);
         customerButton.setVisible(true);
         sellingButton.setVisible(true);
+        reservationButton.setVisible(true);
     }
 
     class BannerPanel extends JPanel {
