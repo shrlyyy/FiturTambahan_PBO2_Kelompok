@@ -4,9 +4,6 @@
  */
 package com.mycompany.mavenproject3;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
 /**
  *
  * @author ASUS
@@ -17,19 +14,24 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class ReservationForm extends JFrame {
     private JComboBox<String> phoneComboBox;
     private JTextField idField;
     private JTextField nameField;
-    private JTextField dateField;
-    private JTextField timeField;
+    private JSpinner dateSpinner;
+    private JSpinner timeSpinner;
     private JTextField numberOfPeopleField;
+    private JTextField tableField;
     private JButton saveButton;
     private JButton deleteButton;
+    private boolean isEditing = false;
+    private int editingReservationId = -1;
+
 
     private JTable reservationTable;
     private DefaultTableModel tableModel;
@@ -46,7 +48,7 @@ public class ReservationForm extends JFrame {
         setLocationRelativeTo(null);
 
         // Panel form dengan GridLayout
-        JPanel formPanel = new JPanel(new GridLayout(3, 4, 10, 10));
+        JPanel formPanel = new JPanel(new GridLayout(4, 3, 10, 10));
         formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         formPanel.add(new JLabel("Nomor Telepon:"));
@@ -69,12 +71,20 @@ public class ReservationForm extends JFrame {
         formPanel.add(nameField);
 
         formPanel.add(new JLabel("Tanggal Reservasi (yyyy-MM-dd):"));
-        dateField = new JTextField();
-        formPanel.add(dateField);
+        dateSpinner = new JSpinner(new SpinnerDateModel());
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dateSpinner, "yyyy-MM-dd");
+        dateSpinner.setEditor(dateEditor);
+        formPanel.add(dateSpinner);
 
         formPanel.add(new JLabel("Jam Reservasi (HH:mm):"));
-        timeField = new JTextField();
-        formPanel.add(timeField);
+        timeSpinner = new JSpinner(new SpinnerDateModel());
+        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(timeSpinner, "HH:mm");
+        timeSpinner.setEditor(timeEditor);
+        formPanel.add(timeSpinner);
+
+        formPanel.add(new JLabel("Meja:"));
+        tableField = new JTextField();
+        formPanel.add(tableField);
 
         formPanel.add(new JLabel("Jumlah Orang:"));
         numberOfPeopleField = new JTextField();
@@ -93,7 +103,7 @@ public class ReservationForm extends JFrame {
         getContentPane().add(topPanel, BorderLayout.NORTH);
 
         // Tabel reservasi
-        tableModel = new DefaultTableModel(new String[]{"ID Reservasi", "ID Customer", "Nama", "Tanggal", "Jam", "Jumlah Orang"}, 0);
+        tableModel = new DefaultTableModel(new String[]{"ID Reservasi", "ID Customer", "Nama", "Tanggal", "Jam", "Meja", "Jumlah Orang"}, 0);
         reservationTable = new JTable(tableModel);
         getContentPane().add(new JScrollPane(reservationTable), BorderLayout.CENTER);
 
@@ -117,7 +127,56 @@ public class ReservationForm extends JFrame {
         saveButton.addActionListener(e -> saveReservation());
         deleteButton.addActionListener(e -> deleteReservation());
 
+        reservationTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = reservationTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    String resIdStr = tableModel.getValueAt(selectedRow, 0).toString(); // R001
+                    editingReservationId = Integer.parseInt(resIdStr.replaceAll("\\D+", ""));
+                    isEditing = true;
+
+                    // Lanjutkan isi field seperti sebelumnya
+                    String custIdStr = tableModel.getValueAt(selectedRow, 1).toString();
+                    Object custNameObj = tableModel.getValueAt(selectedRow, 2);
+                    Object dateObj = tableModel.getValueAt(selectedRow, 3);
+                    Object timeObj = tableModel.getValueAt(selectedRow, 4);
+                    Object tableObj = tableModel.getValueAt(selectedRow, 5);
+                    Object numPeopleObj = tableModel.getValueAt(selectedRow, 6);
+
+                    idField.setText(custIdStr);
+                    nameField.setText(custNameObj.toString());
+                    phoneComboBox.setSelectedItem(getPhoneByCustomerId(custIdStr));
+                    tableField.setText(tableObj.toString());
+                    numberOfPeopleField.setText(numPeopleObj.toString());
+
+                    try {
+                        LocalDate ld = LocalDate.parse(dateObj.toString());
+                        dateSpinner.setValue(java.sql.Date.valueOf(ld));
+                    } catch (Exception ex) {
+                        dateSpinner.setValue(new Date());
+                    }
+
+                    try {
+                        LocalTime lt = LocalTime.parse(timeObj.toString());
+                        Date timeDate = Date.from(lt.atDate(LocalDate.of(1970, 1, 1)).atZone(ZoneId.systemDefault()).toInstant());
+                        timeSpinner.setValue(timeDate);
+                    } catch (Exception ex) {
+                        timeSpinner.setValue(new Date());
+                    }
+                }
+            }
+        });
+
         refreshTable();
+    }
+
+    private String getPhoneByCustomerId(String custId) {
+        for (Customer c : customers) {
+            if (c.getId().equals(custId)) {
+                return c.getPhoneNumber().toString();
+            }
+        }
+        return "";
     }
 
     private void updateCustomerInfo() {
@@ -148,39 +207,63 @@ public class ReservationForm extends JFrame {
     private void saveReservation() {
         String idCust = idField.getText();
         String nameCust = nameField.getText();
-        String dateStr = dateField.getText().trim();
-        String timeStr = timeField.getText().trim();
-        String numberStr = numberOfPeopleField.getText().trim();
+        int numPeople;
+        String table = tableField.getText().trim();
 
         if (idCust.isEmpty() || nameCust.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Cari dan pilih customer terlebih dahulu.");
             return;
         }
-        if (dateStr.isEmpty() || timeStr.isEmpty() || numberStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Semua field harus diisi.");
+        if (table.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Meja harus diisi.");
             return;
         }
 
         try {
-            LocalDate date = LocalDate.parse(dateStr);
-            LocalTime time = LocalTime.parse(timeStr);
-            int numPeople = Integer.parseInt(numberStr);
+            numPeople = Integer.parseInt(numberOfPeopleField.getText().trim());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Jumlah orang harus angka.");
+            return;
+        }
 
-            int reservationId = reservations.size() + 1;
+        try {
+            Date dateValue = (Date) dateSpinner.getValue();
+            Date timeValue = (Date) timeSpinner.getValue();
+            LocalDate localDate = Instant.ofEpochMilli(dateValue.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalTime localTime = Instant.ofEpochMilli(timeValue.getTime()).atZone(ZoneId.systemDefault()).toLocalTime().withSecond(0).withNano(0);
+
             int customerId = Integer.parseInt(idCust.replaceAll("\\D+", ""));
 
-            Reservation newRes = new Reservation(
+            if (isEditing && editingReservationId != -1) {
+                // MODE UPDATE
+                for (Reservation r : reservations) {
+                    if (r.getReservationId() == editingReservationId) {
+                        r.setCustomerId(customerId);
+                        r.setReservationDate(localDate);
+                        r.setReservationTime(localTime);
+                        r.setTable(table);
+                        r.setNumberOfPeople(numPeople);
+                        r.setEditedBy("admin");
+                        break;
+                    }
+                }
+                JOptionPane.showMessageDialog(this, "Reservasi berhasil diperbarui.");
+            } else {
+                // MODE TAMBAH
+                int reservationId = reservations.size() + 1;
+                Reservation newRes = new Reservation(
                     reservationId,
                     customerId,
-                    date,
-                    time,
-                    "Meja 1",
+                    localDate,
+                    localTime,
+                    table,
                     numPeople,
                     "admin", null, null
-            );
+                );
+                reservations.add(newRes);
+                JOptionPane.showMessageDialog(this, "Reservasi berhasil disimpan.");
+            }
 
-            reservations.add(newRes);
-            JOptionPane.showMessageDialog(this, "Reservasi berhasil disimpan.");
             clearFields();
             refreshTable();
         } catch (Exception ex) {
@@ -191,7 +274,9 @@ public class ReservationForm extends JFrame {
     private void deleteReservation() {
         int selectedRow = reservationTable.getSelectedRow();
         if (selectedRow != -1) {
-            int resId = (int) tableModel.getValueAt(selectedRow, 0);
+            String resIdStr = tableModel.getValueAt(selectedRow, 0).toString(); // "R001"
+            int resId = Integer.parseInt(resIdStr.replaceAll("\\D+", ""));      // ambil angka 001 → int
+
             Reservation toRemove = null;
             for (Reservation r : reservations) {
                 if (r.getReservationId() == resId) {
@@ -214,28 +299,37 @@ public class ReservationForm extends JFrame {
         ((JTextField) phoneComboBox.getEditor().getEditorComponent()).setText("");
         idField.setText("");
         nameField.setText("");
-        dateField.setText("");
-        timeField.setText("");
+        dateSpinner.setValue(new Date());
+        timeSpinner.setValue(new Date());
         numberOfPeopleField.setText("");
+        tableField.setText("");
+        isEditing = false;
+        editingReservationId = -1;
     }
 
     private void refreshTable() {
         tableModel.setRowCount(0);
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
         for (Reservation r : reservations) {
             String custName = "";
+            String formattedCustomerId = String.format("C%03d", r.getCustomerId());
             for (Customer c : customers) {
-                if (c.getId().equals("cust" + String.format("%03d", r.getCustomerId()))) {
+                if (c.getId().equals(formattedCustomerId)) {
                     custName = c.getName();
                     break;
                 }
             }
+            String formattedReservationId = String.format("R%03d", r.getReservationId());
+
             tableModel.addRow(new Object[]{
-                    r.getReservationId(),
-                    "cust" + String.format("%03d", r.getCustomerId()),
-                    custName,
-                    r.getReservationDate(),
-                    r.getReservationTime(),
-                    r.getNumberOfPeople()
+                formattedReservationId,       // ID Reservasi seperti R001
+                formattedCustomerId,          // ID Customer seperti C001
+                custName,
+                r.getReservationDate(),
+                r.getReservationTime().format(timeFormatter),
+                r.getTable(),
+                r.getNumberOfPeople()
             });
         }
     }

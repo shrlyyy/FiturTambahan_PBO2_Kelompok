@@ -26,6 +26,7 @@ public class Reservation {
         this.reservationId = reservationId;
         this.customerId = customerId;
         this.reservationDate = reservationDate;
+        this.reservationTime = reservationTime;
         this.table = table;
         this.numberOfPeople = numberOfPeople;
         this.createdBy = createdBy;
