@@ -63,7 +63,7 @@ public class CustomerForm extends JFrame {
         getContentPane().add(topPanel, BorderLayout.NORTH);
 
         // Tabel
-        tableModel = new DefaultTableModel(new String[]{"Nama", "Nomor Telepon", "Alamat"}, 0);
+        tableModel = new DefaultTableModel(new String[]{"ID", "Nama", "Nomor Telepon", "Alamat"}, 0);
         customerTable = new JTable(tableModel);
         getContentPane().add(new JScrollPane(customerTable), BorderLayout.CENTER);
 
@@ -169,6 +169,7 @@ public class CustomerForm extends JFrame {
         tableModel.setRowCount(0);
         for (Customer c : customers) {
             tableModel.addRow(new Object[]{
+                c.getId(),
                 c.getName(),
                 c.getPhoneNumber(),
                 c.getAddress()

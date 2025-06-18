@@ -9,15 +9,20 @@ package com.mycompany.mavenproject3;
  * @author ASUS
  */
 public class Customer {
+    private static int counter = 1;
+    private String id;
     private String name;
     private Long phoneNumber;
     private String address;
 
     public Customer(String name, Long phoneNumber, String address) {
+        this.id = String.format("C%03d", counter++);
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.address = address;
     }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

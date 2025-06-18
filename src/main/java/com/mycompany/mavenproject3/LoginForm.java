@@ -38,7 +38,7 @@ public class LoginForm extends JFrame {
         // Inisialisasi akun kasir
         cashierAccounts = new HashMap<>();
         cashierAccounts.put("kasir01", "aitibieses");
-        cashierAccounts.put("admin02", "mantapbetul");
+        cashierAccounts.put("kasir02", "mantapbetul");
 
         // Panel Username
         JPanel userPanel = new JPanel(new FlowLayout());
