@@ -9,6 +9,9 @@ package com.mycompany.mavenproject3;
  * @author ASUS
  */
 
+import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.TimePicker;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -23,8 +26,8 @@ public class ReservationForm extends JFrame {
     private JComboBox<String> phoneComboBox;
     private JTextField idField;
     private JTextField nameField;
-    private JSpinner dateSpinner;
-    private JSpinner timeSpinner;
+    private DatePicker datePicker;
+    private TimePicker timePicker;
     private JTextField numberOfPeopleField;
     private JTextField tableField;
     private JButton saveButton;
@@ -70,17 +73,13 @@ public class ReservationForm extends JFrame {
         nameField.setEditable(false);
         formPanel.add(nameField);
 
-        formPanel.add(new JLabel("Tanggal Reservasi (yyyy-MM-dd):"));
-        dateSpinner = new JSpinner(new SpinnerDateModel());
-        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dateSpinner, "yyyy-MM-dd");
-        dateSpinner.setEditor(dateEditor);
-        formPanel.add(dateSpinner);
+        formPanel.add(new JLabel("Tanggal Reservasi:"));
+        datePicker = new DatePicker();
+        formPanel.add(datePicker);
 
-        formPanel.add(new JLabel("Jam Reservasi (HH:mm):"));
-        timeSpinner = new JSpinner(new SpinnerDateModel());
-        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(timeSpinner, "HH:mm");
-        timeSpinner.setEditor(timeEditor);
-        formPanel.add(timeSpinner);
+        formPanel.add(new JLabel("Jam Reservasi:"));
+        timePicker = new TimePicker();
+        formPanel.add(timePicker);
 
         formPanel.add(new JLabel("Meja:"));
         tableField = new JTextField();
@@ -151,17 +150,16 @@ public class ReservationForm extends JFrame {
 
                     try {
                         LocalDate ld = LocalDate.parse(dateObj.toString());
-                        dateSpinner.setValue(java.sql.Date.valueOf(ld));
+                        datePicker.setDate(ld);
                     } catch (Exception ex) {
-                        dateSpinner.setValue(new Date());
+                        datePicker.clear();
                     }
 
                     try {
                         LocalTime lt = LocalTime.parse(timeObj.toString());
-                        Date timeDate = Date.from(lt.atDate(LocalDate.of(1970, 1, 1)).atZone(ZoneId.systemDefault()).toInstant());
-                        timeSpinner.setValue(timeDate);
+                        timePicker.setTime(lt);
                     } catch (Exception ex) {
-                        timeSpinner.setValue(new Date());
+                        timePicker.clear();
                     }
                 }
             }
@@ -227,10 +225,8 @@ public class ReservationForm extends JFrame {
         }
 
         try {
-            Date dateValue = (Date) dateSpinner.getValue();
-            Date timeValue = (Date) timeSpinner.getValue();
-            LocalDate localDate = Instant.ofEpochMilli(dateValue.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalTime localTime = Instant.ofEpochMilli(timeValue.getTime()).atZone(ZoneId.systemDefault()).toLocalTime().withSecond(0).withNano(0);
+            LocalDate localDate = datePicker.getDate();
+            LocalTime localTime = timePicker.getTime();
 
             int customerId = Integer.parseInt(idCust.replaceAll("\\D+", ""));
 
@@ -299,10 +295,10 @@ public class ReservationForm extends JFrame {
         ((JTextField) phoneComboBox.getEditor().getEditorComponent()).setText("");
         idField.setText("");
         nameField.setText("");
-        dateSpinner.setValue(new Date());
-        timeSpinner.setValue(new Date());
-        numberOfPeopleField.setText("");
         tableField.setText("");
+        numberOfPeopleField.setText("");
+        datePicker.clear();
+        timePicker.clear();
         isEditing = false;
         editingReservationId = -1;
     }
