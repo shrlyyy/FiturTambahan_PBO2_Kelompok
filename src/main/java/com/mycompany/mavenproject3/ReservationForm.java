@@ -10,6 +10,7 @@ package com.mycompany.mavenproject3;
  */
 
 import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.TimePicker;
 
 import javax.swing.*;
@@ -75,6 +76,11 @@ public class ReservationForm extends JFrame {
 
         formPanel.add(new JLabel("Tanggal Reservasi:"));
         datePicker = new DatePicker();
+
+        DatePickerSettings dateSettings = new DatePickerSettings();
+        dateSettings.setFormatForDatesBeforeCommonEra("dd-MM-yyyy");;
+        datePicker.setSettings(dateSettings);
+        
         formPanel.add(datePicker);
 
         formPanel.add(new JLabel("Jam Reservasi:"));
