@@ -25,9 +25,12 @@ public class Mavenproject3 extends JFrame implements Runnable {
     private JButton sellingButton;
     private JButton customerButton;
     private JButton reservationButton;
+    private JButton logoutButton;
     private String currentUser;
 
+
     private ArrayList<Customer> sharedCustomers = new ArrayList<>();
+
 
     public Mavenproject3() {
         initUI();
@@ -53,22 +56,24 @@ public class Mavenproject3 extends JFrame implements Runnable {
         bannerPanel = new BannerPanel();
         add(bannerPanel, BorderLayout.CENTER);
 
-        // Tombol "Kelola Produk"
         JPanel bottomPanel = new JPanel();
         addProductButton = new JButton("Kelola Produk");
         customerButton = new JButton("Kelola Customer");
         sellingButton = new JButton("Penjualan");
         reservationButton = new JButton("Reservasi");
+        logoutButton = new JButton("Logout");
 
         bottomPanel.add(addProductButton);
         bottomPanel.add(customerButton);
         bottomPanel.add(sellingButton);
         bottomPanel.add(reservationButton);
+        bottomPanel.add(logoutButton);
 
         addProductButton.setVisible(false);
         customerButton.setVisible(false);
         sellingButton.setVisible(false);
         reservationButton.setVisible(false);
+        logoutButton.setVisible(false);
 
         add(bottomPanel, BorderLayout.SOUTH);
 
@@ -91,7 +96,7 @@ public class Mavenproject3 extends JFrame implements Runnable {
         });
 
         sellingButton.addActionListener(e -> {
-        SellingForm sellingForm = new SellingForm(form);
+        SellingForm sellingForm = new SellingForm(form, sharedCustomers, ReservationForm.getReservations());
         // sellingForm.setUsername(currentUser);
         sellingForm.setVisible(true);
         });
@@ -101,7 +106,7 @@ public class Mavenproject3 extends JFrame implements Runnable {
             reservationForm.setVisible(true);
         });
 
-        // showLoginDialog();
+        logoutButton.addActionListener(e -> logout());
 
         setVisible(true);
 
@@ -121,6 +126,21 @@ public class Mavenproject3 extends JFrame implements Runnable {
         customerButton.setVisible(true);
         sellingButton.setVisible(true);
         reservationButton.setVisible(true);
+        logoutButton.setVisible(true);
+    }
+
+    private void logout() {
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Apakah Anda yakin ingin logout?", 
+            "Konfirmasi Logout", 
+            JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            this.currentUser = null;
+
+        // Tampilkan login form lagi
+        showLoginDialog();
+        }
     }
 
     class BannerPanel extends JPanel {

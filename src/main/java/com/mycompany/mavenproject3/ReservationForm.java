@@ -333,6 +333,10 @@ public class ReservationForm extends JFrame {
                 r.getTable(),
                 r.getNumberOfPeople()
             });
-        }
+        }        
+    }
+
+    public static ArrayList<Reservation> getReservations() {
+        return reservations;
     }
 }
