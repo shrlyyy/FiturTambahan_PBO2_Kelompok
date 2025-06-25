@@ -80,8 +80,7 @@ public class Mavenproject3 extends JFrame implements Runnable {
         });
 
         customerButton.addActionListener(e -> {
-        CustomerForm customerForm = new CustomerForm(sharedCustomers);
-        // customerForm.setUsername(currentUser);
+        CustomerForm customerForm = new CustomerForm(sharedCustomers, currentUser);
         customerForm.setVisible(true);
         });
 
