@@ -54,7 +54,7 @@ public class ProductForm extends JFrame {
         products.add(new Product(5, "P005", "Jus Apel", "Juice", 22000, 9));
         
         setTitle("WK. Cuan | Stok Barang");
-        setSize(600, 450);
+        setSize(700, 450);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         

@@ -39,7 +39,7 @@ public class Mavenproject3 extends JFrame implements Runnable {
 
     private void initUI() {
         setTitle("WK. STI Chill");
-        setSize(600, 150);
+        setSize(850, 150);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -86,12 +86,11 @@ public class Mavenproject3 extends JFrame implements Runnable {
 
         sellingButton.addActionListener(e -> {
         SellingForm sellingForm = new SellingForm(form, sharedCustomers, ReservationForm.getReservations());
-        // sellingForm.setUsername(currentUser);
         sellingForm.setVisible(true);
         });
 
         reservationButton.addActionListener(e -> {
-            ReservationForm reservationForm = new ReservationForm(sharedCustomers);
+            ReservationForm reservationForm = new ReservationForm(sharedCustomers, currentUser);
             reservationForm.setVisible(true);
         });
 

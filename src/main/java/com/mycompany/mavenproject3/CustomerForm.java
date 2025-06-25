@@ -33,7 +33,7 @@ public class CustomerForm extends JFrame {
         this.currentUser = currentUser; 
         
         setTitle("WK. Cuan | Form Customer");
-        setSize(600, 300);
+        setSize(700, 300);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
